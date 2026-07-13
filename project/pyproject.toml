@@ -1,0 +1,24 @@
+[project]
+name = "project"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "SWTxSerega-tech",email = "happycraft2468@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic (>=2.13.4,<3.0.0)",
+    "sqlalchemy (>=2.0.51,<3.0.0)",
+    "pyjwt (>=2.13.0,<3.0.0)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "fastapi (>=0.139.0,<0.140.0)",
+    "dotenv (>=0.9.9,<0.10.0)"
+]
+
+[tool.poetry]
+packages = [{include = "project", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
