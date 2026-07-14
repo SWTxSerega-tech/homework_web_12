@@ -1,6 +1,5 @@
 from datetime import timedelta
 from fastapi import FastAPI, Depends, HTTPException, Query, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import jwt
 
@@ -22,9 +21,9 @@ def signup(user_data: UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, user_data=user_data)
 
 @app.post("/auth/login", response_model=Token, status_code=status.HTTP_201_CREATED)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = crud.get_user_by_email(db, email=form_data.username)
-    if not user or not verify_password(form_data.password, user.hashed_password):
+def login(login_data: UserCreate, db: Session = Depends(get_db)):
+    user = crud.get_user_by_email(db, email=login_data.email)
+    if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
     access_token = create_access_token(data={"sub": user.email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -38,6 +37,9 @@ def refresh_token(body: TokenRefreshRequest, db: Session = Depends(get_db)):
     try:
         payload = jwt.decode(body.refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
         email = payload.get("sub")
+        scope = payload.get("scope")
+        if scope != "refresh_token":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token scope")
     except jwt.PyJWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
         
